@@ -7,6 +7,8 @@ console.log('[ROUTES] Admin routes loaded');
 
 router.post('/register', upload.single('profile_image'), adminController.registerAdmin); // FIXED!
 router.post('/verify-otp', adminController.approveOtp);
+router.post('/login', adminController.loginAdmin); // ✅ THIS LINE NOW WORKS
+
 // Admin login
 router.post('/login', (req, res) => {
   console.log('[ROUTES] POST /login');

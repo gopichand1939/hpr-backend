@@ -47,21 +47,19 @@ const registerAdmin = async (adminData) => {
 };
 
 // Get admin by email
-const getAdminByEmail = (email) => {
+const getAdminByEmail = async (email) => {
   console.log('[MODEL] Starting getAdminByEmail with email:', email);
   const query = `SELECT * FROM admin_users WHERE email = ?`;
-
-  return new Promise((resolve, reject) => {
-    db.query(query, [email], (err, results) => {
-      if (err) {
-        console.error('[MODEL] Error in getAdminByEmail:', err);
-        return reject(err);
-      }
-      console.log('[MODEL] getAdminByEmail results:', results);
-      resolve(results[0]);
-    });
-  });
+  try {
+    const [rows] = await db.query(query, [email]);
+    console.log('[MODEL] getAdminByEmail results:', rows);
+    return rows[0];
+  } catch (err) {
+    console.error('[MODEL] Error in getAdminByEmail:', err);
+    throw err;
+  }
 };
+
 
 // Mark admin as verified (if needed in future for pre-inserted entries)
 const approveOtp = (email, otp) => {

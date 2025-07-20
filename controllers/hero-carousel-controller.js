@@ -1,5 +1,3 @@
-const path = require('path');
-const fs = require('fs');
 const {
   getAllSlides,
   addSlide,
@@ -13,25 +11,25 @@ console.log('[CONTROLLER] hero-carousel-controller.js loaded');
 // ===============================
 // Get All Slides
 // ===============================
-const fetchHeroSlides = (req, res) => {
+const fetchHeroSlides = async (req, res) => {
   console.log('[CONTROLLER] fetchHeroSlides() called');
 
-  getAllSlides((err, results) => {
-    if (err) {
-      console.error('[CONTROLLER] Error fetching hero slides:', err);
-      return res.status(500).json({ success: false, message: 'Failed to fetch slides' });
-    }
-
-    console.log('[CONTROLLER] Slides fetched successfully');
+  try {
+    const results = await getAllSlides();
     res.status(200).json({ success: true, data: results });
-  });
+  } catch (err) {
+    console.error('[CONTROLLER] Error fetching hero slides:', err);
+    res.status(500).json({ success: false, message: 'Failed to fetch slides' });
+  }
 };
 
 // ===============================
 // Add New Slide
 // ===============================
-const createHeroSlide = (req, res) => {
+const createHeroSlide = async (req, res) => {
   console.log('[CONTROLLER] createHeroSlide() called');
+  console.log('[DEBUG] req.body:', req.body);
+  console.log('[DEBUG] req.file:', req.file);
 
   const { heading, subheading } = req.body;
   const imageFile = req.file;
@@ -44,24 +42,22 @@ const createHeroSlide = (req, res) => {
   const newSlide = {
     heading,
     subheading,
-    image: `/uploads/${imageFile.filename}`,
+    image: imageFile.buffer,
   };
 
-  addSlide(newSlide, (err, result) => {
-    if (err) {
-      console.error('[CONTROLLER] Failed to add slide:', err);
-      return res.status(500).json({ success: false, message: 'Slide creation failed' });
-    }
-
-    console.log('[CONTROLLER] Slide created successfully');
+  try {
+    await addSlide(newSlide);
     res.status(201).json({ success: true, message: 'Slide added successfully' });
-  });
+  } catch (err) {
+    console.error('[CONTROLLER] Failed to add slide:', err);
+    res.status(500).json({ success: false, message: 'Slide creation failed' });
+  }
 };
 
 // ===============================
 // Update Slide
 // ===============================
-const updateHeroSlide = (req, res) => {
+const updateHeroSlide = async (req, res) => {
   console.log('[CONTROLLER] updateHeroSlide() called');
 
   const slideId = req.params.id;
@@ -76,37 +72,33 @@ const updateHeroSlide = (req, res) => {
   const updatedData = {
     heading,
     subheading,
-    image: imageFile ? `/uploads/${imageFile.filename}` : req.body.oldImage, // fallback to old image
+    image: imageFile ? imageFile.buffer : req.body.oldImage,
   };
 
-  updateSlide(slideId, updatedData, (err, result) => {
-    if (err) {
-      console.error('[CONTROLLER] Failed to update slide:', err);
-      return res.status(500).json({ success: false, message: 'Slide update failed' });
-    }
-
-    console.log(`[CONTROLLER] Slide with ID ${slideId} updated`);
+  try {
+    await updateSlide(slideId, updatedData);
     res.status(200).json({ success: true, message: 'Slide updated successfully' });
-  });
+  } catch (err) {
+    console.error('[CONTROLLER] Failed to update slide:', err);
+    res.status(500).json({ success: false, message: 'Slide update failed' });
+  }
 };
 
 // ===============================
 // Delete Slide
 // ===============================
-const deleteHeroSlide = (req, res) => {
+const deleteHeroSlide = async (req, res) => {
   console.log('[CONTROLLER] deleteHeroSlide() called');
 
   const slideId = req.params.id;
 
-  deleteSlide(slideId, (err, result) => {
-    if (err) {
-      console.error('[CONTROLLER] Error deleting slide:', err);
-      return res.status(500).json({ success: false, message: 'Failed to delete slide' });
-    }
-
-    console.log(`[CONTROLLER] Slide with ID ${slideId} deleted`);
+  try {
+    await deleteSlide(slideId);
     res.status(200).json({ success: true, message: 'Slide deleted successfully' });
-  });
+  } catch (err) {
+    console.error('[CONTROLLER] Error deleting slide:', err);
+    res.status(500).json({ success: false, message: 'Failed to delete slide' });
+  }
 };
 
 module.exports = {

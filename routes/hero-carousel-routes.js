@@ -1,7 +1,5 @@
 const express = require('express');
 const router = express.Router();
-const multer = require('multer');
-const path = require('path');
 
 // Controller
 const {
@@ -17,19 +15,9 @@ console.log('[ROUTES] hero-carousel-routes.js loaded');
 // ====================================
 // Setup Multer Storage for Uploads
 // ====================================
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    console.log('[MULTER] Setting destination to /uploads');
-    cb(null, 'uploads/');
-  },
-  filename: function (req, file, cb) {
-    const uniqueName = Date.now() + path.extname(file.originalname);
-    console.log('[MULTER] Generated filename:', uniqueName);
-    cb(null, uniqueName);
-  },
-});
+const multer = require('multer');
+const upload = multer({ storage: multer.memoryStorage() });
 
-const upload = multer({ storage: storage });
 
 // ====================================
 // Routes
@@ -45,7 +33,7 @@ router.get('/', (req, res) => {
 // @POST   /api/hero-carousel
 // @desc   Add new slide
 router.post('/', upload.single('image'), (req, res) => {
-  console.log('[ROUTE] POST /api/hero-carousel called');
+console.log('[ROUTE] POST /api/v1/hero-carousel called');
   createHeroSlide(req, res);
 });
 

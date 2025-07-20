@@ -1,5 +1,3 @@
-// admin-controller.js
-
 const adminModel = require('../models/admin-model');
 const { sendOtpEmail } = require('../utils/email');
 const crypto = require('crypto');
@@ -14,40 +12,26 @@ const tempAdmins = new Map(); // key: email, value: admin data with otp
 const registerAdmin = async (req, res) => {
   console.log('[CONTROLLER] registerAdmin called');
   try {
-  const {
-  name,
-  email,
-  password,
-  contact,
-  role,
-} = req.body;
-
-
-
+    const { name, email, password, contact, role } = req.body;
     console.log('[CONTROLLER] Received registration:', req.body);
 
-    // Check if already in DB and verified
     const existingAdmin = await adminModel.getAdminByEmail(email);
     if (existingAdmin && existingAdmin.is_verified === 1) {
       console.warn('[CONTROLLER] Email already verified:', email);
       return res.status(400).json({ message: 'Email already registered and verified' });
     }
 
-    // Always generate new OTP
     const otp = crypto.randomInt(100000, 999999).toString();
     console.log('[CONTROLLER] Generated OTP:', otp);
 
-    // Send OTP email
     const emailSent = await sendOtpEmail(email, otp);
     if (!emailSent) {
       console.warn('[EMAIL] Failed to send OTP to:', email);
       return res.status(500).json({ message: 'Failed to send OTP email. Please try again.' });
     }
 
-    // 🔁 Convert profile_image base64 string to Buffer for BLOB support
-const profileImageBuffer = req.file ? req.file.buffer : null; // This reads the file as buffer
+    const profileImageBuffer = req.file ? req.file.buffer : null;
 
-    // Store in-memory until OTP is verified
     tempAdmins.set(email, {
       name,
       email,
@@ -55,7 +39,7 @@ const profileImageBuffer = req.file ? req.file.buffer : null; // This reads the 
       contact,
       role: role || 'admin',
       otp,
-      profile_image: profileImageBuffer, // Stored as binary buffer
+      profile_image: profileImageBuffer,
       status: 'pending',
       is_verified: 0,
     });
@@ -82,7 +66,6 @@ const approveOtp = async (req, res) => {
     const { email, otp } = req.body;
     console.log('[CONTROLLER] OTP approval for:', email, 'OTP:', otp);
 
-    // Check if OTP is pending for this email
     if (!tempAdmins.has(email)) {
       console.warn('[CONTROLLER] No OTP request found for:', email);
       return res.status(404).json({ message: 'No OTP request found for this email' });
@@ -90,13 +73,11 @@ const approveOtp = async (req, res) => {
 
     const cachedAdmin = tempAdmins.get(email);
 
-    // Check OTP match
     if (cachedAdmin.otp !== otp) {
       console.warn('[CONTROLLER] Invalid OTP for email:', email);
       return res.status(400).json({ message: 'Invalid OTP' });
     }
 
-    // Prepare and insert into DB
     const finalData = {
       ...cachedAdmin,
       is_verified: 1,
@@ -107,7 +88,6 @@ const approveOtp = async (req, res) => {
     const result = await adminModel.registerAdmin(finalData);
     console.log('[CONTROLLER] Admin inserted into DB:', result);
 
-    // Clean up temp storage
     tempAdmins.delete(email);
 
     return res.status(200).json({
@@ -122,55 +102,56 @@ const approveOtp = async (req, res) => {
   }
 };
 
-
-
 // -----------------------------
 // Admin Login
 // -----------------------------
 const loginAdmin = async (req, res) => {
+  const { email, password } = req.body;
+  console.log('[LOGIN] Request received:', email, password);
+
   try {
-    const { email, password } = req.body;
+    const user = await adminModel.getAdminByEmail(email);
+    console.log('[LOGIN] DB result:', user);
 
-    const admin = await adminModel.getAdminByEmail(email);
-    if (!admin || admin.password !== password) {
-      return res.status(401).json({ message: 'Invalid credentials' });
+    if (!user) {
+      console.log('[LOGIN] No user found');
+      return res.status(401).json({ success: false, message: 'Invalid email' });
     }
 
-    if (!admin.is_verified) {
-      return res.status(403).json({ message: 'Admin not verified' });
+    if (user.password !== password) {
+      console.log('[LOGIN] Password mismatch');
+      return res.status(401).json({ success: false, message: 'Invalid password' });
     }
 
+    // ✅ Generate JWT token
     const token = jwt.sign(
       {
-        id: admin.id,
-        email: admin.email,
-        role: admin.role,
+        id: user.id,
+        email: user.email,
+        role: user.role
       },
-      process.env.JWT_SECRET, // 🔐 Store securely in .env
+      process.env.JWT_SECRET,
       { expiresIn: '1h' }
     );
 
-    res.status(200).json({
+    console.log('[LOGIN] Login successful, token generated');
+
+    return res.status(200).json({
+      success: true,
       message: 'Login successful',
       token,
-      admin: {
-        id: admin.id,
-        name: admin.name,
-        email: admin.email,
-        role: admin.role,
-        status: admin.status,
-        is_verified: admin.is_verified,
-      },
+      user
     });
+
   } catch (err) {
     console.error('[LOGIN ERROR]', err);
-    res.status(500).json({ message: 'Server error during login' });
+    return res.status(500).json({ success: false, message: 'Server error' });
   }
 };
 
 
 
-
+// ✅ Final Export
 module.exports = {
   registerAdmin,
   approveOtp,

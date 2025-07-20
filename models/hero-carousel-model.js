@@ -6,73 +6,57 @@ console.log('[MODEL] hero-carousel-model.js loaded');
 // ================================
 // Get all carousel slides
 // ================================
-const getAllSlides = (callback) => {
+const getAllSlides = async () => {
   console.log('[MODEL] getAllSlides called');
 
-  const query = 'SELECT * FROM hero_carousel ORDER BY id DESC';
-  db.query(query, (err, results) => {
-    if (err) {
-      console.error('[MODEL] Error fetching slides:', err);
-      return callback(err, null);
-    }
-
-    console.log('[MODEL] Slides fetched successfully');
-    callback(null, results);
-  });
+  const [rows] = await db.execute('SELECT * FROM hero_carousel ORDER BY id DESC');
+  console.log('[MODEL] Slides fetched successfully');
+  return rows;
 };
 
 // ================================
 // Add new slide
 // ================================
-const addSlide = (data, callback) => {
+const addSlide = async (data) => {
   console.log('[MODEL] addSlide called with:', data);
 
-  const query = 'INSERT INTO hero_carousel (image, heading, subheading) VALUES (?, ?, ?)';
-  db.query(query, [data.image, data.heading, data.subheading], (err, result) => {
-    if (err) {
-      console.error('[MODEL] Error adding slide:', err);
-      return callback(err, null);
-    }
+  const [result] = await db.execute(
+    'INSERT INTO hero_carousel (image, heading, subheading) VALUES (?, ?, ?)',
+    [data.image, data.heading, data.subheading]
+  );
 
-    console.log('[MODEL] Slide added with ID:', result.insertId);
-    callback(null, result);
-  });
+  console.log('[MODEL] Slide added with ID:', result.insertId);
+  return result;
 };
 
 // ================================
 // Update slide
 // ================================
-const updateSlide = (id, data, callback) => {
+const updateSlide = async (id, data) => {
   console.log(`[MODEL] updateSlide called for ID ${id} with:`, data);
 
-  const query = 'UPDATE hero_carousel SET image = ?, heading = ?, subheading = ? WHERE id = ?';
-  db.query(query, [data.image, data.heading, data.subheading, id], (err, result) => {
-    if (err) {
-      console.error('[MODEL] Error updating slide:', err);
-      return callback(err, null);
-    }
+  const [result] = await db.execute(
+    'UPDATE hero_carousel SET image = ?, heading = ?, subheading = ? WHERE id = ?',
+    [data.image, data.heading, data.subheading, id]
+  );
 
-    console.log(`[MODEL] Slide updated for ID ${id}`);
-    callback(null, result);
-  });
+  console.log(`[MODEL] Slide updated for ID ${id}`);
+  return result;
 };
 
 // ================================
 // Delete slide
 // ================================
-const deleteSlide = (id, callback) => {
+const deleteSlide = async (id) => {
   console.log(`[MODEL] deleteSlide called for ID ${id}`);
 
-  const query = 'DELETE FROM hero_carousel WHERE id = ?';
-  db.query(query, [id], (err, result) => {
-    if (err) {
-      console.error('[MODEL] Error deleting slide:', err);
-      return callback(err, null);
-    }
+  const [result] = await db.execute(
+    'DELETE FROM hero_carousel WHERE id = ?',
+    [id]
+  );
 
-    console.log(`[MODEL] Slide deleted for ID ${id}`);
-    callback(null, result);
-  });
+  console.log(`[MODEL] Slide deleted for ID ${id}`);
+  return result;
 };
 
 module.exports = {

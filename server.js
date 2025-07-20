@@ -3,6 +3,14 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const bodyParser = require('body-parser');
 const path = require('path');
+const missionRoutes = require("./routes/mission-statement-routes");
+const projectRoutes = require('./routes/projects-routes');
+const companyValuesRoutes = require('./routes/company-values-routes');
+const testimonialRoutes = require('./routes/testimonial-routes');
+const footerRoutes = require("./routes/footer-routes");
+const aboutUsRoutes = require("./routes/about-us-routes");
+const aboutUsSubsectionRoutes = require("./routes/about-us-subsection-routes");
+const partnersRoutes = require('./routes/partners-routes');
 
 // Load environment variables
 console.log('[INIT] Loading environment variables...');
@@ -15,6 +23,7 @@ console.log('[INIT] Applying global middlewares...');
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use('/api/v1/home/projects', projectRoutes);
 
 console.log('[INIT] Setting static folder for uploads...');
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -28,6 +37,13 @@ const adminRoutes = require('./routes/admin-routes');
 console.log('[ROUTES] Attaching route middlewares...');
 app.use('/api/v1/hero-carousel', heroCarouselRoutes);
 app.use('/api/v1/admin', adminRoutes);
+app.use("/api/v1/mission", missionRoutes);
+app.use('/api/v1/home/company-values', companyValuesRoutes);
+app.use('/api/v1/home/testimonials', testimonialRoutes);
+app.use("/api/v1/home/footer", footerRoutes);
+app.use("/api/v1", aboutUsRoutes);
+app.use("/api/v1", aboutUsSubsectionRoutes);
+app.use('/api/v1/partners', partnersRoutes);
 
 // Default route
 app.get('/', (req, res) => {
