@@ -2,10 +2,10 @@ const db = require("../config/db");
 console.log("[MODEL] footer-model.js loaded");
 
 const FooterModel = {
-  getAll: async () => {
-    console.log("[MODEL] getAll called");
-    const [rows] = await db.query("SELECT * FROM footer LIMIT 1");
-    return rows; // ✅ return as array
+  getLatest: async () => {
+    console.log("[MODEL] getLatest called");
+    const [rows] = await db.query("SELECT * FROM footer ORDER BY id DESC LIMIT 1");
+    return rows; // ✅ Always returns latest footer
   },
 
   create: async (data) => {

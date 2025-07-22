@@ -260,15 +260,26 @@ deletePlan: async (req, res) => {
     }
   },
 
-  getLocationByProjectId: async (req, res) => {
-    try {
-      const data = await HprProjectsModel.getLocationByProjectId(req.params.project_id);
-      res.json(data);
-    } catch (err) {
-      console.error("getLocationByProjectId error:", err);
-      res.status(500).json({ message: "Server error" });
-    }
-  },
+getLocationByProjectId: async (req, res) => {
+  try {
+    const data = await HprProjectsModel.getLocationByProjectId(req.params.project_id);
+
+    const formatted = Array.isArray(data)
+      ? data.map((item) => ({
+          id: item.id,
+          project_id: item.project_id,
+          title: "Map Location", // ✅ Dummy title since it's not in DB
+          map_url: item.iframe_link, // ✅ Correctly map field
+        }))
+      : [];
+
+    res.json(formatted);
+  } catch (err) {
+    console.error("getLocationByProjectId error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+},
+
 
   updateLocation: async (req, res) => {
     try {

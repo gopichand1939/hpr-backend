@@ -7,28 +7,33 @@ exports.getFooter = async (req, res) => {
   try {
     console.log("[CONTROLLER] getFooter called");
 
-    const data = await FooterModel.getAll(); // returns an array
+    const data = await FooterModel.getLatest(); // ✅ Get latest footer
 
     if (Array.isArray(data) && data.length > 0 && data[0].logo) {
-      const logoPath = path.join(__dirname, "..", "uploads", data[0].logo);
-      data[0].logo = fs.existsSync(logoPath)
-        ? fs.readFileSync(logoPath).toString("base64")
-        : null;
+      // ✅ Convert BLOB buffer to base64 directly
+      data[0].logo = Buffer.from(data[0].logo).toString("base64");
     }
 
-    res.json({ success: true, data });
+    res.json({ success: true, data: data[0] });
   } catch (error) {
     console.error("GET footer error", error);
     res.status(500).json({ success: false, message: "Error getting footer" });
   }
 };
 
+
 exports.createFooter = async (req, res) => {
   try {
     console.log("[CONTROLLER] createFooter called");
 
-    const logo = req.file ? req.file.filename : null;
-    const data = { ...req.body, logo };
+    const logo = req.file ? req.file.buffer : null;
+    const originalName = req.file ? req.file.originalname : null;
+
+    const data = {
+      ...req.body,
+      logo,
+      logo_filename: originalName // ⬅️ save if needed
+    };
 
     await FooterModel.create(data);
     res.json({ success: true, message: "Footer created" });
@@ -42,8 +47,16 @@ exports.updateFooter = async (req, res) => {
   try {
     console.log("[CONTROLLER] updateFooter called");
 
-    const logo = req.file ? req.file.filename : req.body.existingLogo;
-    const data = { ...req.body, logo };
+    const id = req.params.id;
+    const logo = req.file ? req.file.buffer : req.body.existingLogo;
+    const originalName = req.file ? req.file.originalname : req.body.existingLogoFilename;
+
+    const data = {
+      ...req.body,
+      id,
+      logo,
+      logo_filename: originalName // ⬅️ if updating filename
+    };
 
     await FooterModel.update(data);
     res.json({ success: true, message: "Footer updated" });
@@ -52,6 +65,8 @@ exports.updateFooter = async (req, res) => {
     res.status(500).json({ success: false, message: "Error updating footer" });
   }
 };
+
+
 
 exports.deleteFooter = async (req, res) => {
   try {
