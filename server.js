@@ -11,6 +11,7 @@ const footerRoutes = require("./routes/footer-routes");
 const aboutUsRoutes = require("./routes/about-us-routes");
 const aboutUsSubsectionRoutes = require("./routes/about-us-subsection-routes");
 const partnersRoutes = require('./routes/partners-routes');
+const hprProjectsRoutes = require('./routes/hpr-projects-routes');
 
 // Load environment variables
 console.log('[INIT] Loading environment variables...');
@@ -20,9 +21,17 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 console.log('[INIT] Applying global middlewares...');
-app.use(cors());
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+// app.use(cors());
+
+app.use(cors({
+  origin: "http://localhost:5173",   // frontend domain
+  credentials: true                  // allow cookies/tokens
+}));
+
+
+app.use(bodyParser.json({ limit: '25mb' }));
+app.use(bodyParser.urlencoded({ extended: true, limit: '25mb' }));
+
 app.use('/api/v1/home/projects', projectRoutes);
 
 console.log('[INIT] Setting static folder for uploads...');
@@ -44,6 +53,7 @@ app.use("/api/v1/home/footer", footerRoutes);
 app.use("/api/v1", aboutUsRoutes);
 app.use("/api/v1", aboutUsSubsectionRoutes);
 app.use('/api/v1/partners', partnersRoutes);
+app.use('/api/v1', hprProjectsRoutes);
 
 // Default route
 app.get('/', (req, res) => {

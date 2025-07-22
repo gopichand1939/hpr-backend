@@ -11,6 +11,8 @@ const db = mysql.createPool({
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
+  // ✅ Add this line to increase the max packet size to 256MB
+  maxAllowedPacket: 256 * 1024 * 1024,
 });
 
 module.exports = db;
