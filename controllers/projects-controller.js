@@ -26,23 +26,18 @@ const fetchProjects = async (req, res) => {
   }
 };
 
-
-
-
-
-
 const createProject = async (req, res) => {
   try {
     const { title, description } = req.body;
     const image = req.file?.buffer;
 
+    console.log('[CREATE] Received:', { title, description, fileExists: !!req.file });
+
     if (!title || !description || !image) {
       return res.status(400).json({ success: false, message: 'All fields are required' });
     }
 
-    const project = { title, description, image };
-    await addProject(project);
-
+    await addProject({ title, description, image });
     res.status(201).json({ success: true, message: 'Project created successfully' });
   } catch (err) {
     console.error('[CONTROLLER] Failed to create project:', err);

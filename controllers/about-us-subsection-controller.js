@@ -22,9 +22,8 @@ exports.getSubsections = async (req, res) => {
 exports.createSubsection = async (req, res) => {
   try {
     const { heading, description } = req.body;
-    const imageBuffer = req.file ? fs.readFileSync(req.file.path) : null;
+const imageBuffer = req.file ? req.file.buffer : null;  // ✅ CORRECT
     const id = await AboutUsSubsectionModel.create(heading, description, imageBuffer);
-    if (req.file) fs.unlinkSync(req.file.path);
     res.status(201).json({ id, heading, description });
   } catch (err) {
     console.error("CREATE Subsection Error:", err);
@@ -36,9 +35,8 @@ exports.updateSubsection = async (req, res) => {
   try {
     const { id } = req.params;
     const { heading, description } = req.body;
-    const imageBuffer = req.file ? fs.readFileSync(req.file.path) : null;
+const imageBuffer = req.file ? req.file.buffer : null;
     await AboutUsSubsectionModel.update(id, heading, description, imageBuffer);
-    if (req.file) fs.unlinkSync(req.file.path);
     res.json({ id, heading, description });
   } catch (err) {
     console.error("UPDATE Subsection Error:", err);

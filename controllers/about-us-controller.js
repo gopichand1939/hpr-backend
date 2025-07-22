@@ -22,9 +22,18 @@ exports.getAboutUs = async (req, res) => {
 exports.createAboutUs = async (req, res) => {
   try {
     const { heading, description } = req.body;
-    const imageBuffer = req.file ? fs.readFileSync(req.file.path) : null;
+    const imageBuffer = req.file ? req.file.buffer : null; // ✅ Compatible with memoryStorage
+
+    console.log('[CREATE] heading:', heading);
+    console.log('[CREATE] description:', description);
+    console.log('[CREATE] file received:', !!req.file); // true if file uploaded
+
+    if (!heading || !description) {
+      return res.status(400).json({ message: "All fields are required." });
+    }
+
     const id = await AboutUsModel.create(heading, description, imageBuffer);
-    if (req.file) fs.unlinkSync(req.file.path);
+
     res.status(201).json({ id, heading, description });
   } catch (err) {
     console.error("CREATE About Us Error:", err);
@@ -32,11 +41,13 @@ exports.createAboutUs = async (req, res) => {
   }
 };
 
+
+
 exports.updateAboutUs = async (req, res) => {
   try {
     const { id } = req.params;
     const { heading, description } = req.body;
-    const imageBuffer = req.file ? fs.readFileSync(req.file.path) : null;
+const imageBuffer = req.file ? req.file.buffer : null;
     await AboutUsModel.update(id, heading, description, imageBuffer);
     if (req.file) fs.unlinkSync(req.file.path);
     res.json({ id, heading, description });
