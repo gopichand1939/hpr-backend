@@ -71,18 +71,21 @@ const HprProjectsModel = {
   },
 
 // -------------------- GALLERY --------------------
-addGalleryImage: async (projectId, workDate, description, image) => {
+addGalleryImage: async (projectId, workDate, description, image, category) => {
   console.log("⏺️ INSERTING GALLERY:");
   console.log("projectId:", projectId);
   console.log("workDate:", workDate);
   console.log("description:", description);
   console.log("image present:", !!image);
+  console.log("category:", category);
 
   return db.execute(
-    `INSERT INTO hpr_projects_gallery (project_id, work_date, description, image_blob) VALUES (?, ?, ?, ?)`,
-    [projectId, workDate, description, image || null] // ✅ Ensures no "undefined"
+    `INSERT INTO hpr_projects_gallery (project_id, work_date, description, image_blob, category)
+     VALUES (?, ?, ?, ?, ?)`,
+    [projectId, workDate, description, image || null, category || null]
   );
 },
+
 
 getGalleryByProjectId: async (projectId) => {
   const [rows] = await db.execute(
@@ -149,7 +152,8 @@ deletePlan: async (id) => {
 
   getLocationByProjectId: async (projectId) => {
     const [rows] = await db.execute(`SELECT * FROM hpr_projects_location WHERE project_id = ?`, [projectId]);
-    return rows[0];
+    return rows;
+
   },
 
   updateLocation: async (id, iframe) => {
@@ -160,29 +164,44 @@ deletePlan: async (id) => {
     return db.execute(`DELETE FROM hpr_projects_location WHERE id = ?`, [id]);
   },
 
-  // -------------------- AMENITIES --------------------
-  addAmenities: async (projectId, infrastructure, features) => {
-    return db.execute(
-      `INSERT INTO hpr_projects_amenities (project_id, infrastructure, features) VALUES (?, ?, ?)`,
-      [projectId, JSON.stringify(infrastructure), JSON.stringify(features)]
-    );
-  },
+// -------------------- AMENITIES --------------------
+addAmenities: async (projectId, infrastructure, features) => {
+  return db.execute(
+    `INSERT INTO hpr_projects_amenities (project_id, infrastructure, features) VALUES (?, ?, ?)`,
+    [projectId, JSON.stringify(infrastructure), JSON.stringify(features)]
+  );
+},
 
-  getAmenitiesByProjectId: async (projectId) => {
-    const [rows] = await db.execute(`SELECT * FROM hpr_projects_amenities WHERE project_id = ?`, [projectId]);
-    return rows[0];
-  },
+getAmenitiesByProjectId: async (projectId) => {
+  const [rows] = await db.execute(
+    `SELECT * FROM hpr_projects_amenities WHERE project_id = ?`,
+    [projectId]
+  );
+  return rows;
+},
 
-  updateAmenities: async (id, infrastructure, features) => {
-    return db.execute(
-      `UPDATE hpr_projects_amenities SET infrastructure = ?, features = ? WHERE id = ?`,
-      [JSON.stringify(infrastructure), JSON.stringify(features), id]
-    );
-  },
+updateAmenities: async (id, infrastructure, features) => {
+  return db.execute(
+    `UPDATE hpr_projects_amenities SET infrastructure = ?, features = ? WHERE id = ?`,
+    [JSON.stringify(infrastructure), JSON.stringify(features), id]
+  );
+},
 
-  deleteAmenities: async (id) => {
-    return db.execute(`DELETE FROM hpr_projects_amenities WHERE id = ?`, [id]);
-  },
+deleteAmenities: async (id) => {
+  return db.execute(
+    `DELETE FROM hpr_projects_amenities WHERE id = ?`,
+    [id]
+  );
+},
+
+getAmenitiesById: async (id) => {
+  const [rows] = await db.execute(
+    `SELECT * FROM hpr_projects_amenities WHERE id = ?`,
+    [id]
+  );
+  return rows[0];
+}
+,
 
   // -------------------- CONTACT FORM --------------------
   submitContactForm: async (name, email, phone, message, projectName) => {

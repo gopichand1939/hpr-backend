@@ -73,9 +73,17 @@ router.get("/hpr-projects/location/:project_id", HprProjectsController.getLocati
 router.put("/hpr-projects/location/:id", authMiddleware, HprProjectsController.updateLocation);
 router.delete("/hpr-projects/location/:id", authMiddleware, HprProjectsController.deleteLocation);
 
+
+
+router.get("/gallery-category/:category", HprProjectsController.getGalleryByCategory);
+
+
+
+
 // ---------- AMENITIES ----------
 router.post("/hpr-projects/amenities", authMiddleware, HprProjectsController.addAmenities);
 router.get("/hpr-projects/amenities/:project_id", HprProjectsController.getAmenitiesByProjectId);
+router.get("/hpr-projects/amenities/id/:id", HprProjectsController.getAmenitiesById); // ✅ optional get by record id
 router.put("/hpr-projects/amenities/:id", authMiddleware, HprProjectsController.updateAmenities);
 router.delete("/hpr-projects/amenities/:id", authMiddleware, HprProjectsController.deleteAmenities);
 
