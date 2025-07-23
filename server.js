@@ -31,18 +31,30 @@ console.log('[INIT] Applying global middlewares...');
 
 // below is the abve replce 
 
+const allowedOrigins = [
+  "http://localhost:5173",
+  /\.vercel\.app$/ // Allow all *.vercel.app URLs
+];
+
 app.use(cors({
-  origin: "http://localhost:5173", // ✅ Your frontend
+  origin: function (origin, callback) {
+    // allow requests with no origin (like mobile apps or Postman)
+    if (!origin) return callback(null, true);
+
+    const isAllowed = allowedOrigins.some(o =>
+      typeof o === 'string' ? o === origin : o.test(origin)
+    );
+
+    if (isAllowed) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS: " + origin));
+    }
+  },
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true
 }));
-
-
-
-
-
-
 
 
 
