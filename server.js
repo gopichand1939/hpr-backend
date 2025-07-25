@@ -31,16 +31,17 @@ console.log('[INIT] Applying global middlewares...');
 
 
 // below is the abve replce 
-
 const allowedOrigins = [
-  "http://localhost:5173",
-  /\.vercel\.app$/ // Allow all *.vercel.app URLs
+  "http://localhost:5173",                        // Local frontend
+  "https://hpr-infra.netlify.app",               // Netlify frontend
+  "https://hpr-infra.vercel.app",                // (optional) Vercel deploy
+  "https://yourdomain.com",                      // (optional) GoDaddy domain
+  /\.vercel\.app$/                               // wildcard for *.vercel.app
 ];
 
 app.use(cors({
   origin: function (origin, callback) {
-    // allow requests with no origin (like mobile apps or Postman)
-    if (!origin) return callback(null, true);
+    if (!origin) return callback(null, true); // Allow Postman/server-side requests
 
     const isAllowed = allowedOrigins.some(o =>
       typeof o === 'string' ? o === origin : o.test(origin)
@@ -49,6 +50,7 @@ app.use(cors({
     if (isAllowed) {
       callback(null, true);
     } else {
+      console.error("❌ BLOCKED BY CORS:", origin);
       callback(new Error("Not allowed by CORS: " + origin));
     }
   },
