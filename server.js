@@ -12,6 +12,7 @@ const aboutUsRoutes = require("./routes/about-us-routes");
 const aboutUsSubsectionRoutes = require("./routes/about-us-subsection-routes");
 const partnersRoutes = require('./routes/partners-routes');
 const hprProjectsRoutes = require('./routes/hpr-projects-routes');
+const newsRoutes = require('./routes/news-routes'); // ✅ Add this line
 
 // Load environment variables
 console.log('[INIT] Loading environment variables...');
@@ -84,6 +85,7 @@ app.use("/api/v1", aboutUsRoutes);
 app.use("/api/v1", aboutUsSubsectionRoutes);
 app.use('/api/v1/partners', partnersRoutes);
 app.use('/api/v1', hprProjectsRoutes);
+app.use('/api/v1/news', newsRoutes); // ✅ Add this line
 
 // Default route
 app.get('/', (req, res) => {
