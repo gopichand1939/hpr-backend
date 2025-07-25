@@ -31,20 +31,23 @@ console.log('[INIT] Applying global middlewares...');
 
 
 // below is the abve replce 
+const cors = require("cors");
+
 const allowedOrigins = [
-  "http://localhost:5173",                        // Local frontend
-  "https://hpr-infra.netlify.app",               // Netlify frontend
-  "https://hpr-infra.vercel.app",                // (optional) Vercel deploy
-  "https://yourdomain.com",                      // (optional) GoDaddy domain
-  /\.vercel\.app$/                               // wildcard for *.vercel.app
+  "http://localhost:5173",                           // Local dev
+  "https://hpr-infra.netlify.app",                   // Netlify
+  "https://hpr-infra.vercel.app",                    // Vercel
+  "https://frontend.hprinfra.com",                   // ✅ GoDaddy deployed frontend
+  /\.vercel\.app$/,                                  // wildcard *.vercel.app
+  /\.netlify\.app$/                                  // wildcard *.netlify.app
 ];
 
-app.use(cors({
+const corsOptions = {
   origin: function (origin, callback) {
-    if (!origin) return callback(null, true); // Allow Postman/server-side requests
+    if (!origin) return callback(null, true); // Allow server-to-server or Postman
 
     const isAllowed = allowedOrigins.some(o =>
-      typeof o === 'string' ? o === origin : o.test(origin)
+      typeof o === "string" ? o === origin : o.test(origin)
     );
 
     if (isAllowed) {
@@ -57,8 +60,9 @@ app.use(cors({
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true
-}));
+};
 
+app.use(cors(corsOptions));
 
 
 
