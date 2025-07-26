@@ -90,7 +90,7 @@ app.use("/api/v1", aboutUsRoutes);
 app.use("/api/v1", aboutUsSubsectionRoutes);
 app.use('/api/v1/partners', partnersRoutes);
 app.use('/api/v1', hprProjectsRoutes);
-app.use('/api/v1/news', newsRoutes); // ✅ Add this line
+app.use('/api/v1/news', newsRoutes); 
 
 // Default route
 app.get('/', (req, res) => {
